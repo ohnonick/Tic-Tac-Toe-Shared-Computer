@@ -1,0 +1,39 @@
+<DOCTYPE html>
+    <head>
+        <!-- [CS491 - Assignment 2] -->
+        <title>Tic-Tac-Toe+</title>
+        <!-- by Nicky Victoriano -->
+        <link rel="stylesheet" href="style.css"/>
+        <script src="app.js"></script>
+    </head>
+    <div style="float: left; width: 25%">
+        <table>
+            <tr>
+                <td><button onclick="pickSpot(0)" class="ttt"></button></td>
+                <td><button onclick="pickSpot(1)" class="ttt"></button></td>
+                <td><button onclick="pickSpot(2)" class="ttt"></button></td>
+            </tr>
+            <tr>
+                <td><button onclick="pickSpot(3)" class="ttt"></button></td>
+                <td><button onclick="pickSpot(4)" class="ttt"></button></td>
+                <td><button onclick="pickSpot(5)" class="ttt"></button></td>
+            </tr>
+            <tr>
+                <td><button onclick="pickSpot(6)" class="ttt"></button></td>
+                <td><button onclick="pickSpot(7)" class="ttt"></button></td>
+                <td><button onclick="pickSpot(8)" class="ttt"></button></td>
+            </tr>
+        </table>
+        <button onclick="startGame()" class="toggler start" id="toggler">
+            Start
+        </button>
+    </div>
+    <div style="float: right; width: 75%">
+        <h1 class="fix_header">Tic-Tac-Toe</h1>
+        <h3 class="fix_header">
+            You: X <br />
+            Computer: O
+        </h3>
+        <p><b>Current Move:</b> <span id="currentTurn"></span></p>
+    </div>
+</DOCTYPE>

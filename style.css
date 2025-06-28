@@ -1,0 +1,51 @@
+body {
+    background-color: darkolivegreen;
+    color: white;
+}
+
+div {
+    margin: auto;
+}
+
+button {
+    background-color: white;
+    color: black;
+    width: 30px;
+    height: 30px;
+}
+
+.selectable:hover {
+    background-color: bisque;
+}
+
+.toggler {
+    width: 103px;
+    height: 25px;
+}
+
+.clear {
+    background-color: coral;
+}
+
+    .clear:hover {
+        color: white;
+        background-color: darkred;
+    }
+
+.start {
+    background-color: lightgreen;
+}
+
+    .start:hover {
+        color: white;
+        background-color: darkgreen;
+    }
+
+.fix_header {
+    margin: 0;
+    padding: 0;
+}
+
+.red {
+    color: red;
+}
