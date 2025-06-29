@@ -374,7 +374,6 @@ async function onGuessNumber(){
         console.log("X guesses: " + textBox.value);
     }
     await updateGameState();
-    await readGameState();
 }
 
 /**
@@ -414,7 +413,7 @@ async function onBoardClick(index) {
  */
 function isMyTurn(){
     console.log("I am X? " + iAmX);
-    console.log("Current turn: currentGameState.currentTurn");
+    console.log("Current turn: " + currentGameState.currentTurn);
     return ((iAmX && currentGameState.currentTurn === 'X') || (!iAmX && currentGameState.currentTurn === 'O'));
 }
 
