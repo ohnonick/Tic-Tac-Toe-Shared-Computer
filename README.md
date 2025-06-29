@@ -2,7 +2,7 @@
 [CS491 - Assignment 3] 2-Player Tic-Tac-Toe (on a Shared Computer)
 
 ## Website
-[GitHub Static Page]()
+[GitHub Static Page](https://ohnonick.github.io/Tic-Tac-Toe-Shared-Computer/)
 
 ## Rules/Controls
 - Play on two browsers on the same computer
