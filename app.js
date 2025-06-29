@@ -102,9 +102,9 @@ async function createGameStateFile(){
     
     // join game
     iAmX = true;
-    await startGameState();
     await enterGame();
     await startGameState();
+    await updateGameState();
 }
 
 /**
@@ -209,7 +209,6 @@ async function readGameState(){
 async function enterGame(){
     await readGameState();
     getElements();
-    updateFileName();
 }
 
 /**
@@ -276,6 +275,8 @@ function updateGameVisuals(){
         for (let index of currentGameState.winningIndexes)
             buttons[index].classList.add('red');
     }
+    
+    updateFileName();
 }
 
 /**
