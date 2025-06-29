@@ -361,17 +361,20 @@ async function onToggleClick() {
  * @return {void}
  */
 async function onGuessNumber(){
-    await readGameState();
     var textBox = document.getElementById('diceGuess');
     if (isNaN(Number(textBox.value))){
         alert("Please type a number for your guess!");
         return;
     }
-    if (iAmX)
+    if (iAmX) {
         currentGameState.xDiceGuess = Number(textBox.value);
-    else
+        console.log("X guesses: " + textBox.value);
+    } else {
         currentGameState.oDiceGuess = Number(textBox.value);
+        console.log("X guesses: " + textBox.value);
+    }
     await updateGameState();
+    await readGameState();
 }
 
 /**
