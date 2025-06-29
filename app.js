@@ -113,8 +113,9 @@ async function createGameStateFile(){
     
     // join game
     iAmX = true;
-    await clearGameState();
     await getElements();
+    await clearGameState();
+    updateGameVisuals();
 }
 
 /**
@@ -128,8 +129,8 @@ async function joinGameStateFile(){
 
     // join game
     iAmX = false;
-    await readGameState();
     getElements();
+    await readGameState();
 }
 
 /**
