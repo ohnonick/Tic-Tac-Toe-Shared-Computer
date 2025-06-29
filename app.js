@@ -400,6 +400,7 @@ async function onBoardClick(index) {
     if (currentGameState.status === 'playing') {
         currentGameState.currentTurn = nextPlayer;
     }
+    console.log('Move played!')
     await updateGameState();
 }
 // #endregion
@@ -411,8 +412,6 @@ async function onBoardClick(index) {
  * @return {bool}
  */
 function isMyTurn(){
-    console.log("I am X? " + iAmX);
-    console.log("Current turn: " + currentGameState.currentTurn);
     return ((iAmX && currentGameState.currentTurn === 'X') || (!iAmX && currentGameState.currentTurn === 'O'));
 }
 
