@@ -103,6 +103,7 @@ async function createGameStateFile(){
     // join game
     iAmX = true;
     await enterGame();
+    await startGameState();
 }
 
 /**
@@ -205,9 +206,9 @@ async function readGameState(){
  * @function enterGame
  */
 async function enterGame(){
-    updateFileName();
-    getElements();
     await readGameState();
+    getElements();
+    updateFileName();
 }
 
 /**
