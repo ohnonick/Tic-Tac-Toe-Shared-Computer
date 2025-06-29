@@ -102,6 +102,7 @@ async function createGameStateFile(){
     
     // join game
     iAmX = true;
+    await startGameState();
     await enterGame();
     await startGameState();
 }
