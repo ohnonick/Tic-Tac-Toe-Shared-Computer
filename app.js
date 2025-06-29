@@ -74,7 +74,18 @@ var diceContainer;
  * Object containing up-to-date game information.
  * @type {GameState}
  */
-var currentGameState;
+var currentGameState = {
+        status: 'player-select',
+        board: ['', '', '', 
+                '', '', '',
+                '', '', '',],
+        currentTurn: '',
+        firstTurn: null,
+        diceRoll: null,
+        xDiceGuess: null,
+        oDiceGuess: null,
+        winningIndexes: [],
+    }
 
 /**
  * Current file in used for game.
