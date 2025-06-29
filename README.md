@@ -5,7 +5,8 @@
 [GitHub Static Page](https://ohnonick.github.io/Tic-Tac-Toe-Shared-Computer/)
 
 ## Rules/Controls
-- Play on two browsers on the same computer
+- Play on two browsers on the same computer.
+- Click anywhere on the page to refresh!
 - Create a game to be X.
 - Join a game to be O.
 - Join the same file to play together.

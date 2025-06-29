@@ -115,7 +115,6 @@ async function createGameStateFile(){
     iAmX = true;
     await getElements();
     await clearGameState();
-    updateGameVisuals();
 }
 
 /**
@@ -154,6 +153,8 @@ async function clearGameState(){
     let jsonString = JSON.stringify(currentGameState);
     await fileWritable.write(jsonString);
     await fileWritable.close();
+
+    updateGameVisuals();
 }
 
 /**
@@ -178,6 +179,8 @@ async function startGameState(icon){
     let jsonString = JSON.stringify(currentGameState);
     await fileWritable.write(jsonString);
     await fileWritable.close();
+
+    updateGameVisuals();
 }
 
 /**
@@ -235,6 +238,12 @@ function getElements(){
     }
 
     toggler.addEventListener('click', () => onToggleClick());
+
+    document.addEventListener('click', async () => {
+        if (fileHandle) {
+            await readGameState();
+        }
+    });
 }
 
 /**
@@ -317,27 +326,25 @@ async function onToggleClick() {
         if (xDifference == oDifference) {
             alert('Players tied! Resubmit numbers.');
             await clearGameState();
+            return;
         } else {
             alert('The number was ' + currentGameState.diceRoll +
                 '!\nX guessed ' + currentGameState.xDiceGuess +
-                '.\nO guessed ' + currentGameState.oDiceGuess + '.');
-            (xDifference < oDifference) ? await startGameState('X') : await startGameState('O');
+                '.\nO guessed ' + currentGameState.oDiceGuess +
+                '.\nPlease let the other player know to click their screen to refresh!');
+            (xDifference < oDifference) ? await startGameState('X') : await startGameState('O');  
+            return;
         }
-
-        await updateGameState();
-        return;
     }
 
     if (gameStatus === 'playing' || gameStatus === 'draw'){
         await clearGameState();
-        await updateGameState();
         return;
     }
 
     if (gameStatus === 'win'){
         let winner = currentGameState.board[currentGameState.winningIndexes[0]];
         await startGameState(winner);
-        await updateGameState();
         return;
     }
 }
