@@ -184,8 +184,7 @@ async function updateGameState(){
  * @function readGameState
  */
 async function readGameState(){
-    const file = await fileHandle.getFile();
-    fileContents = await file.text();
+    fileContents = await fileHandle.text();
     const jsonObject = JSON.parse(fileContents);
 
     currentGameState.status = jsonObject.status;
