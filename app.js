@@ -238,12 +238,6 @@ function getElements(){
     }
 
     toggler.addEventListener('click', () => onToggleClick());
-
-    document.addEventListener('click', async (e) => {
-        if (fileHandle && (e.target.tagName !== 'BUTTON' || e.target.tagName !== 'button')) {
-            await readGameState();
-        }
-    });
 }
 
 /**
@@ -304,6 +298,18 @@ function updateFileName(){
 
 // #region Event Handlers
 /**
+ * Update screen for up-to-date visuals.
+ * @function onRefresh
+ */
+async function onRefresh(){
+    try {    
+        await readGameState();
+    } catch {
+        return;
+    }
+}
+
+/**
  * Begins (or clears) game, depending on `currentGameState.status`.
  * @function onToggleClick
  * @return {void}
@@ -331,7 +337,7 @@ async function onToggleClick() {
             alert('The number was ' + currentGameState.diceRoll +
                 '!\nX guessed ' + currentGameState.xDiceGuess +
                 '.\nO guessed ' + currentGameState.oDiceGuess +
-                '.\nPlease let the other player know to click their screen to refresh!');
+                '.\nPlease let the other player know to click [Refresh]!');
             (xDifference < oDifference) ? await startGameState('X') : await startGameState('O');  
             return;
         }

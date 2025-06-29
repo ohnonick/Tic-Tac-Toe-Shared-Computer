@@ -6,7 +6,7 @@
 
 ## Rules/Controls
 - Play on two browsers on the same computer.
-- Click anywhere on the page to refresh!
+- Click 'Refresh' to update your screen!
 - Create a game to be X.
 - Join a game to be O.
 - Join the same file to play together.
