@@ -317,24 +317,27 @@ async function onToggleClick() {
         if (xDifference == oDifference) {
             alert('Players tied! Resubmit numbers.');
             await clearGameState();
-            return;
         } else {
             alert('The number was ' + currentGameState.diceRoll +
                 '!\nX guessed ' + currentGameState.xDiceGuess +
                 '.\nO guessed ' + currentGameState.oDiceGuess + '.');
             (xDifference < oDifference) ? await startGameState('X') : await startGameState('O');
-            return;
         }
+
+        await updateGameState();
+        return;
     }
 
     if (gameStatus === 'playing' || gameStatus === 'draw'){
         await clearGameState();
+        await updateGameState();
         return;
     }
 
     if (gameStatus === 'win'){
         let winner = currentGameState.board[currentGameState.winningIndexes[0]];
         await startGameState(winner);
+        await updateGameState();
         return;
     }
 }
@@ -366,10 +369,13 @@ async function onGuessNumber(){
  */
 async function onBoardClick(index) {
     await readGameState();
+    console.log(currentGameState.currentTurn + " clicked " + index);
 
     // Take turn
-    if (!isPlayable(index))
+    if (!isPlayable(index)){
+        console.log("Move is not valid");
         return;
+    }
 
     let nextPlayer = iAmX ? "O" : "X";
     currentGameState.board[index] = currentGameState.currentTurn;
@@ -425,8 +431,10 @@ function isWin() {
         }
     }
     currentGameState.winningIndexes =  [...winners];
-    if (playerWon)
+    if (playerWon){
         currentGameState.status = 'win';
+        console.log("Player wins!")
+    }
     return playerWon;
 }
 
@@ -440,7 +448,9 @@ function isDraw(){
         if (boardIcon === '')
             foundDraw = false;
     }
-    if (foundDraw)
+    if (foundDraw){
         currentGameState.status = 'draw';
+        console.log("Players have a draw!")
+    }
 }
 // #endregion
