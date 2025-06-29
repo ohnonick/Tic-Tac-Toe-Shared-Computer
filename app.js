@@ -231,10 +231,8 @@ function getElements(){
     buttons = document.getElementsByClassName('ttt');
     diceContainer = document.getElementById('dice');
 
-    let i = 0;
-    for (let button of buttons){
-        button.addEventListener('click', () => onBoardClick(i));
-        i++;
+    for (let i = 0; i < buttons.length; i++){
+        buttons[i].addEventListener('click', () => onBoardClick(i));
     }
 
     toggler.addEventListener('click', () => onToggleClick());
