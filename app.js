@@ -111,7 +111,9 @@ async function createGameStateFile(){
  * @function joinGameStateFile
  */
 async function joinGameStateFile(){
-    fileHandle = await self.showOpenFilePicker({startIn: 'documents'});
+    const fileHandles = await self.showOpenFilePicker({startIn: 'documents'});
+    // If only one file is expected, you can destructure the array:
+    [fileHandle] = fileHandles;
 
     // join game
     iAmX = false;
@@ -184,7 +186,8 @@ async function updateGameState(){
  * @function readGameState
  */
 async function readGameState(){
-    fileContents = await fileHandle.text();
+    const file = await fileHandle.getFile();
+    fileContents = await file.text();
     const jsonObject = JSON.parse(fileContents);
 
     currentGameState.status = jsonObject.status;
