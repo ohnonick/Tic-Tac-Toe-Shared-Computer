@@ -239,7 +239,7 @@ function getElements(){
 
     toggler.addEventListener('click', () => onToggleClick());
 
-    document.addEventListener('click', async () => {
+    document.addEventListener('click', async (e) => {
         if (fileHandle && (e.target.tagName !== 'BUTTON' || e.target.tagName !== 'button')) {
             await readGameState();
         }
