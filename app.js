@@ -361,6 +361,7 @@ async function onToggleClick() {
  * @return {void}
  */
 async function onGuessNumber(){
+    await readGameState();
     var textBox = document.getElementById('diceGuess');
     if (isNaN(Number(textBox.value))){
         alert("Please type a number for your guess!");
