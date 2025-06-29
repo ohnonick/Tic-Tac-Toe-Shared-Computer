@@ -413,6 +413,8 @@ async function onBoardClick(index) {
  * @return {bool}
  */
 function isMyTurn(){
+    console.log("I am X? " + iAmX);
+    console.log("Current turn: currentGameState.currentTurn");
     return ((iAmX && currentGameState.currentTurn === 'X') || (!iAmX && currentGameState.currentTurn === 'O'));
 }
 
@@ -423,6 +425,8 @@ function isMyTurn(){
  * @return {bool} - Returns true if spot is not filled.
  */
 function isPlayable(index) {
+    console.log("Is my turn? " + isMyTurn());
+    console.log("Attempted index: " + currentGameState.board[index]);
     return (currentGameState.board[index] === '' && isMyTurn());
 }
 
