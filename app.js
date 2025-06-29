@@ -102,9 +102,8 @@ async function createGameStateFile(){
     
     // join game
     iAmX = true;
-    await enterGame();
     await clearGameState();
-    await updateGameState();
+    await getElements();
 }
 
 /**
@@ -116,7 +115,8 @@ async function joinGameStateFile(){
 
     // join game
     iAmX = false;
-    await enterGame();
+    await readGameState();
+    getElements();
 }
 
 /**
@@ -202,15 +202,6 @@ async function readGameState(){
 // #endregion
 
 // #region HTML
-/**
- * Join the game with the latest visuals.
- * @function enterGame
- */
-async function enterGame(){
-    await readGameState();
-    getElements();
-}
-
 /**
  * Read in elements from DOM and add click event listeners.
  * @function getElements
