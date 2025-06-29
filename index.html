@@ -9,31 +9,35 @@
     <div style="float: left; width: 25%">
         <table>
             <tr>
-                <td><button onclick="pickSpot(0)" class="ttt"></button></td>
-                <td><button onclick="pickSpot(1)" class="ttt"></button></td>
-                <td><button onclick="pickSpot(2)" class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
             </tr>
             <tr>
-                <td><button onclick="pickSpot(3)" class="ttt"></button></td>
-                <td><button onclick="pickSpot(4)" class="ttt"></button></td>
-                <td><button onclick="pickSpot(5)" class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
             </tr>
             <tr>
-                <td><button onclick="pickSpot(6)" class="ttt"></button></td>
-                <td><button onclick="pickSpot(7)" class="ttt"></button></td>
-                <td><button onclick="pickSpot(8)" class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
+                <td><button class="ttt"></button></td>
             </tr>
         </table>
-        <button onclick="startGame()" class="toggler start" id="toggler">
-            Start
-        </button>
+        <button class="toggler start" id="toggler">Start</button>
+        <div id="dice">
+            <p><i>To play, please guess a number 1 - 6. Whoever guesses closest goes first!</i></p>
+            <input type="text" id="diceGuess"> <button class="toggler selectable" onclick="onGuessNumber()">Guess #</button>
+        </div>
     </div>
     <div style="float: right; width: 75%">
         <h1 class="fix_header">Tic-Tac-Toe</h1>
         <h3 class="fix_header">
-            You: X <br />
-            Computer: O
+            You are: <span id="turnIcon"></span>
         </h3>
         <p><b>Current Move:</b> <span id="currentTurn"></span></p>
+        <button class="toggler selectable" onclick="createGameStateFile()">Create game</button> <br>
+        <button class="toggler selectable" onclick="joinGameStateFile()">Join game</button>
+        <p><b>Playing in Game File:</b> <span id="fileName">Please select a file!</span></p>
     </div>
 </DOCTYPE>

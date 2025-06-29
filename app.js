@@ -2,6 +2,14 @@
 [CS491 - Assignment 3] Tic-Tac-Toe: Shared Computer
 Nicky Victoriano | 29 June 2025
 */
+
+// #region Global Variables
+/**
+ * True: this player is X.
+ * @type {bool}
+ */
+var iAmX;
+
 /**
  * All winning combinations.
  * @constant
@@ -11,313 +19,420 @@ const winCombos = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
     [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
     [0, 4, 8], [2, 4, 6]             // Diagonals
-]
+];
 
 /**
- * Begins (or clears) game, depending on toggler content.
- * @function startGame
- * @return void
+ * Current turn section in DOM.
+ * @type {span}
  */
-function startGame() {
-    // Get elements
-    var currentTurn = document.getElementById('currentTurn');
-    var toggler = document.getElementById('toggler');
-    var buttons = document.getElementsByClassName('ttt');
+var currentTurn;
 
-    // Clear game
-    if (toggler.textContent == 'Clear') {
-        clearBoard(toggler, currentTurn, buttons);
+/**
+ * Player's marker section in DOM.
+ * @type {span}
+ */
+var turnIcon;
+
+/**
+ * Current gameplay file name in DOM.
+ * @type {span}
+ */
+var fileName;
+
+/**
+ * Clear/start button of DOM.
+ * @type {button}
+ */
+var toggler;
+
+/**
+ * Collection of 9 gameplay buttons in DOM.
+ * @type {HTMLCollection}
+ */
+var buttons;
+
+/**
+ * Container for dice input in DOM.
+ * @type {div}
+ */
+var diceContainer;
+
+/**
+ * @typedef GameState
+ * @type {object}
+ * @property {string} status - Game status ("player-select", "playing", "win", "draw").
+ * @property {string[]} board - 9x9 grid of played moves.
+ * @property {?string} currentTurn - Current turn ("X", "O", "").
+ * @property {?string} firstTurn - First player to go in game ("X", "O", null).
+ * @property {?int} diceRoll - Random number 1 - 6 (null when not in use).
+ * @property {?int} xDiceGuess - Player X's guess for dice roll (null when not in use).
+ * @property {?int} oDiceGuess - Player O's guess for dice roll (null when not in use).
+ * @property {int[]} winningIndexes - Winning indexes found during `isWin()`.
+ */
+
+/**
+ * Object containing up-to-date game information.
+ * @type {GameState}
+ */
+var currentGameState;
+
+/**
+ * Current file in used for game.
+ * @type {File}
+ */
+var fileHandle;
+
+// #region File Management
+/**
+ * Create game state file in file manager.
+ * @function createGameStateFile
+ */
+async function createGameStateFile(){
+    const options = {
+        startIn: 'documents',
+        suggestedName: 'Tic-Tac-Toe-Game-State.json',
+        types: [
+            {
+                description: 'Tic-Tac-Toe: Shared Computer (Game State)',
+                accept: {'text/plain': ['.json'],},
+            },
+        ],
+    };
+    fileHandle = await window.showSaveFilePicker(options);
+    
+    // join game
+    iAmX = true;
+    await enterGame();
+}
+
+/**
+ * Join game state file from file manager.
+ * @function joinGameStateFile
+ */
+async function joinGameStateFile(){
+    fileHandle = await self.showOpenFilePicker({startIn: 'documents'});
+
+    // join game
+    iAmX = false;
+    await enterGame();
+}
+
+/**
+ * Restart game to player select.
+ * @function clearGameState
+ */
+async function clearGameState(){
+    const fileWritable = await fileHandle.createWritable();
+    currentGameState = {
+        status: 'player-select',
+        board: ['', '', '', 
+                '', '', '',
+                '', '', '',],
+        currentTurn: '',
+        firstTurn: null,
+        diceRoll: null,
+        xDiceGuess: null,
+        oDiceGuess: null,
+        winningIndexes: [],
+    }
+    let jsonString = JSON.stringify(currentGameState);
+    await fileWritable.write(jsonString);
+    await fileWritable.close();
+}
+
+/**
+ * Start game with selected player.
+ * @function startGameState
+ * @param {string} icon - "X" or "O"
+ */
+async function startGameState(icon){
+    const fileWritable = await fileHandle.createWritable();
+    currentGameState = {
+        status: 'playing',
+        board: ['', '', '', 
+                '', '', '',
+                '', '', '',],
+        currentTurn: icon,
+        firstTurn: icon,
+        diceRoll: null,
+        xDiceGuess: null,
+        oDiceGuess: null,
+        winningIndexes: [],
+    }
+    let jsonString = JSON.stringify(currentGameState);
+    await fileWritable.write(jsonString);
+    await fileWritable.close();
+}
+
+/**
+ * Update game state file to match latest move and update visuals.
+ * @function updateGameState
+ */
+async function updateGameState(){
+    const fileWritable = await fileHandle.createWritable();
+    let jsonString = JSON.stringify(currentGameState);
+    await fileWritable.write(jsonString);
+    await fileWritable.close();
+
+    updateGameVisuals();
+}
+
+/**
+ * Read in game state file and update visuals.
+ * @function readGameState
+ */
+async function readGameState(){
+    const file = await fileHandle.getFile();
+    fileContents = await file.text();
+    const jsonObject = JSON.parse(fileContents);
+
+    currentGameState.status = jsonObject.status;
+    currentGameState.board = jsonObject.board;
+    currentGameState.currentTurn = jsonObject.currentTurn;
+    currentGameState.firstTurn = jsonObject.firstTurn;
+    currentGameState.diceRoll = jsonObject.diceRoll;
+    currentGameState.xDiceGuess = jsonObject.xDiceGuess;
+    currentGameState.oDiceGuess = jsonObject.oDiceGuess;
+    currentGameState.winningIndexes = jsonObject.winningIndexes;
+
+    updateGameVisuals();
+}
+// #endregion
+
+// #region HTML
+/**
+ * Join the game with the latest visuals.
+ * @function enterGame
+ */
+async function enterGame(){
+    updateFileName();
+    getElements();
+    await readGameState();
+}
+
+/**
+ * Read in elements from DOM and add click event listeners.
+ * @function getElements
+ */
+function getElements(){
+    currentTurn = document.getElementById('currentTurn');
+    turnIcon = document.getElementById('turnIcon');
+    fileName = document.getElementById('fileName');
+    toggler = document.getElementById('toggler');
+    buttons = document.getElementsByClassName('ttt');
+    diceContainer = document.getElementById('dice');
+
+    let i = 0;
+    for (let button of buttons){
+        button.addEventListener('click', () => onBoardClick(i));
+        i++;
+    }
+
+    toggler.addEventListener('click', () => onToggleClick());
+}
+
+/**
+ * Update HTML elements to match `currentGameState`.
+ * @function updateGameVisuals
+ */
+function updateGameVisuals(){
+    let gameStatus = currentGameState.status;
+
+    // You are:
+    turnIcon.textContent = iAmX ? "X" : "O";
+
+    // Current Move:
+    currentTurn.textContent = currentGameState.currentTurn;
+    if (gameStatus === 'win') {
+        let winner = currentGameState.board[currentGameState.winningIndexes[0]];
+        currentTurn.textContent = winner + " WON!";
+    } else if (gameStatus === 'draw')
+        currentTurn.textContent = "Draw! Please guess a number to play again!"
+
+    // Dice guessing game
+    diceContainer.style.display = (gameStatus === 'player-select' || gameStatus === 'draw') ? 'block' : 'none';
+
+    // Toggler
+    if (gameStatus === 'playing') {
+        toggler.textContent = 'Clear';
+        toggler.classList.replace('start', 'clear');
+    } else {
+        toggler.textContent = 'Start';
+        toggler.classList.replace('clear', 'start');
+    }
+
+    // Board
+    let i = 0;
+    for (let button of buttons) {
+        button.className = 'ttt';
+        button.textContent = currentGameState.board[i];
+        if (currentGameState.board[i] === '' && isMyTurn())
+            button.classList.add('selectable');
+        i++;
+    }
+    if (gameStatus === 'win') {
+        for (let index of currentGameState.winningIndexes)
+            buttons[index].classList.add('red');
+    }
+}
+
+/**
+ * Update listed file name in HTML.
+ * @function updateFileName
+ */
+function updateFileName(){
+    fileName.textContent = fileHandle.name;
+}
+// #endregion
+
+// #region Event Handlers
+/**
+ * Begins (or clears) game, depending on `currentGameState.status`.
+ * @function onToggleClick
+ * @return {void}
+ */
+async function onToggleClick() {
+    await readGameState();
+    let gameStatus = currentGameState.status;
+
+    if (gameStatus === 'player-select'){
+        if (currentGameState.xDiceGuess === null || currentGameState.oDiceGuess === null){
+            alert("Both players must submit a number to start!");
+            return;
+        }
+
+        // Decide first player
+        currentGameState.diceRoll = Math.floor(Math.random() * 6) + 1;
+        let xDifference = Math.abs(currentGameState.diceRoll - currentGameState.xDiceGuess);
+        let oDifference =  Math.abs(currentGameState.diceRoll - currentGameState.oDiceGuess);
+
+        if (xDifference == oDifference) {
+            alert('Players tied! Resubmit numbers.');
+            await clearGameState();
+            return;
+        } else {
+            alert('The number was ' + currentGameState.diceRoll +
+                '!\nX guessed ' + currentGameState.xDiceGuess +
+                '.\nO guessed ' + currentGameState.oDiceGuess + '.');
+            (xDifference < oDifference) ? await startGameState('X') : await startGameState('O');
+            return;
+        }
+    }
+
+    if (gameStatus === 'playing' || gameStatus === 'draw'){
+        await clearGameState();
         return;
     }
 
-    // Start game
-    for (let button of buttons) {
-        button.classList.add('selectable');
-    }
-    toggler.textContent = 'Clear';
-    toggler.classList.replace('start', 'clear');
-
-    // Pick first turn
-    var firstTurn = Math.floor(Math.random() * 2); // Random number 0 - 1
-    if (firstTurn) {
-        toggleSelectable(buttons, true);
-        currentTurn.textContent = 'You';
-    } else {
-        toggleSelectable(buttons, false);
-        botTurn(buttons, currentTurn);
+    if (gameStatus === 'win'){
+        let winner = currentGameState.board[currentGameState.winningIndexes[0]];
+        await startGameState(winner);
+        return;
     }
 }
 
 /**
- * Resets all fields to pre-game state.
- * @function clearBoard
- * @param {button} toggler - This is the start/clear button.
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @return void
+ * Register player's dice guess.
+ * @function onGuessNumber
+ * @return {void}
  */
-function clearBoard(toggler, currentTurn, buttons) {
-    toggler.textContent = 'Start';
-    toggler.classList.replace('clear', 'start');
-    currentTurn.textContent = '';
-    for (let button of buttons) {
-        button.className = 'ttt';
-        button.textContent = '';
+async function onGuessNumber(){
+    await readGameState();
+    var textBox = document.getElementById('diceGuess');
+    if (isNaN(Number(textBox.value))){
+        alert("Please type a number for your guess!");
+        return;
     }
+    if (iAmX)
+        currentGameState.xDiceGuess = Number(textBox.value);
+    else
+        currentGameState.oDiceGuess = Number(textBox.value);
+    await updateGameState();
 }
 
 /**
- * Makes box selectable or unselectable,
- * @function toggleSelectable
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @param {bool} on - This is the on (true) or off (falss) state of selectable.
- * @return void
- */
-function toggleSelectable(buttons, on) {
-    for (let button of buttons) {
-        if (button.textContent == '') {
-            if (on) {
-                button.classList.add('selectable');
-            } else {
-                button.className = 'ttt';
-            }
-        }
-    }
-}
-
-/**
- * Cchanges the marker on the chosen box.
- * @function markBox
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @param {int} index - This is the index of the selected box.
- * @param {string} marker - This is the marker of the player marking ("X" or "O").
- * @return void
- */
-function markBox(buttons, index, marker) {
-    buttons[index].textContent = marker;
-    buttons[index].classList.remove("selectable");
-}
-
-/**
- * User marks a box.
- * @function pickSpot
+ * Register player move (if valid).
+ * @function onBoardClick
  * @param {int} index - This is the index of the box clicked by the player.
- * @return void
+ * @return {void}
  */
-function pickSpot(index) {
-    // Get elements
-    var buttons = document.getElementsByClassName('ttt');
-    var currentTurn = document.getElementById('currentTurn');
+async function onBoardClick(index) {
+    await readGameState();
 
     // Take turn
-    var firstTurn = isFirstTurn(buttons);
-    if (buttons[index].classList.contains("selectable")) {
-        markBox(buttons, index, 'X');
-        if (!firstTurn) { // If not the first turn, end game or let the bot play
-            toggleSelectable(buttons, false);
-            if (!isWin(buttons)) {
-                botTurn(buttons, currentTurn);
-            }
-            else {
-                currentTurn.textContent = 'YOU WIN!';
-            }
-        }
+    if (!isPlayable(index))
+        return;
+
+    let nextPlayer = iAmX ? "O" : "X";
+    currentGameState.board[index] = currentGameState.currentTurn;
+    isWin();
+    if (currentGameState.status !== 'win') {
+        isDraw();
     }
+    if (currentGameState.status === 'playing') {
+        currentGameState.currentTurn = nextPlayer;
+    }
+    await updateGameState();
 }
+// #endregion
 
+// #region Checkers
 /**
- * Makes bot take turn.
- * @function botTurn
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @param {span} currentTurn - This is a text field containing the playing player.
- * @return void
+ * Check if it is player's turn.
+ * @function isMyTurn
+ * @return {bool}
  */
-async function botTurn(buttons, currentTurn) {
-    currentTurn.textContent = 'Computer';
-    if (isFirstTurn(buttons)) { // Make first move
-        var firstTurn = Math.floor(Math.random() * 5) * 2; // Random even number 0 - 4
-        await delay(.5);
-        markBox(buttons, firstTurn, 'O');
-    }
-
-    /**
-     * Index of best move.
-     * @type{int}
-     */
-    var botMove;
-    /**
-     * Index of potential move.
-     * @type{int}
-     */
-    var potentialMove = Math.floor(Math.random() * 9); // Random number 0 - 8
-    while (!isPlayable(buttons, potentialMove)) {
-        potentialMove = Math.floor(Math.random() * 9); // Random number 0 - 8
-    }
-    botMove = potentialMove; // Update botMove to any playable move
-    potentialMove = goodMoves(buttons);
-    if (potentialMove !== null) { // Update botMove to any playable okay move
-        botMove = potentialMove;
-    }
-    potentialMove = winningMoves(buttons, 'X');
-    if (potentialMove !== null) { // Update botMove to blocking move
-        botMove = potentialMove;
-    }
-    potentialMove = winningMoves(buttons, 'O');
-    if (potentialMove !== null) { // Update botMove to winning move
-        botMove = potentialMove;
-    }
-
-    await delay(.5);
-    markBox(buttons, botMove, 'O'); // Make move
-
-    if (!isWin(buttons)) { // Check for win
-        toggleSelectable(buttons, true);
-        currentTurn.textContent = 'You';
-    } else {
-        currentTurn.textContent = 'COMPUTER WINS!';
-    }
-}
-
-/**
- * Checks if the first turn is being taken.
- * @function isFirstTurn
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @return bool - Returns true if no spots are filled.
- */
-function isFirstTurn(buttons) {
-    for (let button of buttons) {
-        if (!button.textContent == '') {
-            return false;
-        }
-    }
-    return true;
+function isMyTurn(){
+    return ((iAmX && currentGameState.currentTurn === 'X') || (!iAmX && currentGameState.currentTurn === 'O'));
 }
 
 /**
  * Checks if spot can be played in.
  * @function isPlayable
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @param {string} marker - This is the marker of the player marking ("X" or "O").
- * @return bool - Returns true if spot is not filled.
+ * @param {int} index - Index being checked.
+ * @return {bool} - Returns true if spot is not filled.
  */
-function isPlayable(buttons, index) {
-    if (buttons[index].textContent == '') {
-        return true;
-    }
-    return false;
-}
-
-/**
- * Checks for potential good move (corners or center)
- * @function goodMoves
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @return int - Returns index of random corner (or null).
- */
-function goodMoves(buttons) {
-    /**
-     * Index of ideal normal moves.
-     * @constant
-     * @type{int[]}
-     */
-    const idealSpots = [0, 2, 4, 6, 8]
-    /**
-     * Index of available ideal normal moves.
-     * @type{int[]}
-     */
-    var potentialSpots = new Array();
-
-    for (var spot of idealSpots) { // Find potential spots.
-        if (isPlayable(buttons, spot)) {
-            potentialSpots.push(spot)
-        }
-    }
-
-    if (potentialSpots.length == 0) {
-        return null;
-    }
-    return potentialSpots[Math.floor(Math.random() * potentialSpots.length)]; // Pick random spot
-}
-
-/**
- * Checks for winning combinations that are 1 away.
- * @function winningMoves
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @param {string} marker - This is the marker of the player marking ("X" or "O").
- * @return int - Returns index with most wins (or null).
- */
-function winningMoves(buttons, marker) {
-    /**
-     * Indices that can win a game if filled.
-     * @type{int[]}
-     */
-    var winningIndex = new Array();
-    /**
-     * Amount of times each index can win the game.
-     * @type{int[]}
-     */
-    var amount = new Array();
-
-    for (combo of winCombos) { // Find winning moves
-        let x = combo[0];
-        let y = combo[1];
-        let z = combo[2];
-        let index = -1;
-
-        if (buttons[x].textContent === buttons[y].textContent && buttons[x].textContent === marker) { // Missing Z
-            index = z;
-        } else if (buttons[x].textContent === buttons[z].textContent && buttons[x].textContent === marker) { // Missing Y
-            index = y;
-        } else if (buttons[y].textContent === buttons[z].textContent && buttons[z].textContent === marker) { // Missing X
-            index = x;
-        }
-
-        if (winningIndex.includes(index)) {
-            let i = winningIndex.indexOf(index);
-            amount[i] = amount[i] + 1;
-        } else if (index != -1 && isPlayable(buttons, index)) {
-            winningIndex.push(index);
-            amount.push(1);
-        }
-    }
-
-    if (winningIndex.length == 0) { // No wins, move on
-        return null;
-    }
-    const max = Math.max(...amount); // Identify index with most wins
-    let i = amount.indexOf(max);
-    return winningIndex[i];
+function isPlayable(index) {
+    return (currentGameState.board[index] === '' && isMyTurn());
 }
 
 /**
  * Checks if a player has won.
  * @function isWin
- * @param {HTMLCollection} buttons - This is an array of all game buttons.
- * @return bool - Returns true if a winning combination has been played.
+ * @return {bool} - Returns true if player won.
  */
-function isWin(buttons) {
-    let win = false;
+function isWin() {
+    let playerWon = false;
+    let winners = new Set();
+    let board = currentGameState.board;
     for (const combo of winCombos) {
         let x = combo[0];
         let y = combo[1];
         let z = combo[2];
-        if (buttons[x].textContent === buttons[y].textContent && buttons[x].textContent === buttons[z].textContent && buttons[x].textContent != '') {
-            toggleSelectable(buttons, false);
-            buttons[x].classList.add('red');
-            buttons[y].classList.add('red');
-            buttons[z].classList.add('red');
-            win = true;
+        if (board[x] === board[y] && board[x] === board[z] && board[x] != '') {
+            winners.add(x);
+            winners.add(y);
+            winners.add(z);
+            playerWon = true;
         }
     }
-    return win;
+    currentGameState.winningIndexes =  [...winners];
+    if (playerWon)
+        currentGameState.status = 'win';
+    return playerWon;
 }
 
 /**
- * Awaitable function for time delay.
- * @function delay
- * @param {number} seconds - This is the time in seconds to wait for.
- * @return bool - Returns true if a winning combination has been played.
+ * Checks if players hit a draw.
+ * @function isDraw
  */
-function delay(seconds) {
-    return new Promise(function (resolve) {
-        setTimeout(resolve, seconds * 1000);
-    });
+function isDraw(){
+    let foundDraw = true;
+    for (const boardIcon of currentGameState.board) {
+        if (boardIcon === '')
+            foundDraw = false;
+    }
+    if (foundDraw)
+        currentGameState.status = 'draw';
 }
+// #endregion
