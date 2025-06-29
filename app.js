@@ -427,7 +427,7 @@ function isMyTurn(){
 function isPlayable(index) {
     console.log("Is my turn? " + isMyTurn());
     console.log("Attempted index: " + currentGameState.board[index]);
-    return (currentGameState.board[index] === '' && isMyTurn());
+    return ((currentGameState.board[index] === '' || currentGameState.board[index] === null) && isMyTurn());
 }
 
 /**
